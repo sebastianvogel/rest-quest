@@ -1,0 +1,19 @@
+{
+	"globals": {
+		"angular": false, //don't allow writing to angular
+        "require": false
+	},
+    "curly": true,
+    "eqeqeq": true,
+    "expr": true,
+    "forin": true, // force use of hasOwnProperty check in for in loops
+    "immed": true,
+    "noarg": true,
+    "onevar": true,
+    "quotmark": "single",
+    "strict": true, // force use of "use strict"
+    "trailing": true,
+    "undef": true,
+    "unused": true,
+    "node": true
+}
