@@ -122,6 +122,7 @@ class QuestBoard {
     private checkTile(tile: Tile, pos: QuestPosition) {
         if (tile.castle === this.player.name && !utils.equals(pos, this.myCastle)) {
             // TODO calculate board size
+            console.log('Board size determined, the board size is: ' + pos);
         }
         if (tile.castle && tile.castle !== this.player.name) {
             console.log('Castle of other player found ' + tile.castle);
@@ -181,7 +182,7 @@ class QuestBoard {
         if(boardPart[intPos.row] && boardPart[intPos.row][intPos.column]) {
             return boardPart[intPos.row][intPos.column];
         }
-        return undefined;
+        return null;
     }
 
     isTreasureFound(): boolean {

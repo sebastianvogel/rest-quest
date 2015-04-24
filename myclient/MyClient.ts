@@ -10,17 +10,19 @@ import Player = require('./game/Player');
 import rest = require('./RestRequest');
 import helper = require('./Helper');
 
+import Mover = require('./movement/Mover');
 import Searcher = require('./movement/Searcher');
 import ShortestPath = require('./movement/ShortestPath');
 
 var myPlayer: Player = { name: 'elbird-bot-' + parseInt(String(Math.random() * 100), 10) }
 var board = new QuestBoard(myPlayer);
-var searcher = new Searcher(board);
 
-var treasureVisited = false;
 
-var shortestPath: ShortestPath;
 var alwaysAsk = false;
+
+var mover: Mover = new Searcher(board);
+var searching = true;
+var treasureVisited = false;
 
 
 
@@ -30,7 +32,12 @@ function move(dirToGo: Direction, pos: QuestPosition): void {
             helper.printGameData(data);
             return;
         }
-        var currentPos = board.update(data.view, pos, dirToGo);
+        var currentPos: QuestPosition;
+        if (mover.isGoingUpMountain()) {
+            currentPos = pos;
+        } else {
+            var currentPos = board.update(data.view, pos, dirToGo);
+        }
         helper.printGameData(data);
         takeTurn(currentPos);
     });
@@ -44,23 +51,15 @@ function move(dirToGo: Direction, pos: QuestPosition): void {
  */
 function takeTurn (pos: QuestPosition): void {
     var dirToGo: Direction;
-    if (board.isTreasureFound() && treasureVisited) {
-        if (!shortestPath) {
-            shortestPath = new ShortestPath(board, pos, board.getMyCastlePosition());
-        }
-        dirToGo = shortestPath.goNext(pos);
-    } else if (board.isTreasureFound()) {
-        if (!shortestPath) {
-            shortestPath = new ShortestPath(board, pos, board.getTreasurePosition());
-        }
-        dirToGo = searcher.goNext(pos);
-        if (shortestPath.movesLeft() === 0) {
-            shortestPath = null;
-            treasureVisited = true;
-        }
-    } else {
-        dirToGo = searcher.goNext(pos);
+    if (searching && board.isTreasureFound()) {
+        mover = new ShortestPath(board, pos, board.getTreasurePosition());
+        searching = false;
+        treasureVisited = false;
+    } else if (!treasureVisited && mover.isTargetReached()) {
+        treasureVisited = true;
+        mover = new ShortestPath(board, pos, board.getMyCastlePosition());
     }
+    dirToGo = mover.goNext(pos);
     if(alwaysAsk) {
         helper.ask("Go " + Direction[dirToGo], /yes|left|right|up|down/, function (answer) {
             if (answer !== 'yes') {
